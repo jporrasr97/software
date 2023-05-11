@@ -167,16 +167,15 @@ const showLocalVideoPreview = (stream) => {
 };
 
 const addStream = (stream, connUserSocketId) => {
-  // Check if the current user is the room host
-  const currentUserIsHost = store.getState().isRoomHost;
+  const isCurrentUserHost = store.getState().isRoomHost;
 
-  // If the current user is NOT the host, don't add the stream
-  if (!currentUserIsHost) {
+  // Si el usuario actual no es el anfitrión (host), no añadir el stream
+  if (!isCurrentUserHost) {
     return;
   }
 
-  // If the current user is the host, only add the host's stream
-  if (currentUserIsHost && connUserSocketId === store.getState().socketId) {
+  // Si el usuario actual es el host y el socketId del stream entrante es el mismo que el socketId del host
+  if (isCurrentUserHost && connUserSocketId === store.getState().socketId) {
     // display incoming stream
     const videosContainer = document.getElementById("videos_portal");
     const videoContainer = document.createElement("div");
@@ -216,6 +215,7 @@ const addStream = (stream, connUserSocketId) => {
     videosContainer.appendChild(videoContainer);
   }
 };
+
 
 const getAudioOnlyLabel = (identity = "") => {
   const labelContainer = document.createElement("div");
