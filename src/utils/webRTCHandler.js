@@ -174,8 +174,11 @@ const addStream = (stream, connUserSocketId) => {
     return;
   }
 
-  // Si el usuario actual es el host y el socketId del stream entrante es el mismo que el socketId del host
-  if (isCurrentUserHost && connUserSocketId === store.getState().socketId) {
+  // Obtener el nombre del participante correspondiente al socketId
+  const participantNameElement = document.getElementById(`${connUserSocketId}-name`);
+
+  // Si el participante tiene el nombre "HOST", mostrar el stream
+  if (participantNameElement && participantNameElement.textContent === "HOST") {
     // display incoming stream
     const videosContainer = document.getElementById("videos_portal");
     const videoContainer = document.createElement("div");
@@ -203,9 +206,8 @@ const addStream = (stream, connUserSocketId) => {
 
     // check if other user connected only with audio
     const participants = store.getState().participants;
-
     const participant = participants.find((p) => p.socketId === connUserSocketId);
-    console.log(participant);
+
     if (participant?.onlyAudio) {
       videoContainer.appendChild(getAudioOnlyLabel(participant.identity));
     } else {
@@ -215,6 +217,7 @@ const addStream = (stream, connUserSocketId) => {
     videosContainer.appendChild(videoContainer);
   }
 };
+
 
 
 
