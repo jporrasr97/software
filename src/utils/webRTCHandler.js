@@ -1,9 +1,8 @@
-import { setShowOverlay, setMessages, isRoomHost } from "../store/actions";
+import { setShowOverlay, setMessages } from "../store/actions";
 import store from "../store/store";
 import * as wss from "./wss";
 import Peer from "simple-peer";
 import { fetchTURNCredentials, getTurnIceServers } from "./turn";
-
 
 const defaultConstraints = {
   audio: true,
@@ -20,15 +19,36 @@ const onlyAudioConstraints = {
 
 let localStream;
 
-// Exportar localStream aquí, fuera de la función
-export { localStream };
 export const getLocalPreviewAndInitRoomConnection = async (
   isRoomHost,
   identity,
   roomId = null,
   onlyAudio
 ) => {
-  // ...
+  await fetchTURNCredentials();
+
+  const constraints = onlyAudio ? onlyAudioConstraints : defaultConstraints;
+
+  navigator.mediaDevices
+    .getUserMedia(constraints)
+    .then((stream) => {
+      console.log("successfuly received local stream");
+      localStream = stream;
+      showLocalVideoPreview(localStream);
+
+      // dispatch an action to hide overlay
+      store.dispatch(setShowOverlay(false));
+
+      isRoomHost
+        ? wss.createNewRoom(identity, onlyAudio)
+        : wss.joinRoom(identity, roomId, onlyAudio);
+    })
+    .catch((err) => {
+      console.log(
+        "error occurred when trying to get an access to local stream"
+      );
+      console.log(err);
+    });
 };
 
 let peers = {};
@@ -60,9 +80,15 @@ const getConfiguration = () => {
 
 const messengerChannel = "messenger";
 
-export const prepareNewPeerConnection = (connUserSocketId, isInitiator, stream = null) => {
-  // ...
-};
+export const prepareNewPeerConnection = (connUserSocketId, isInitiator) => {
+  const configuration = getConfiguration();
+
+  peers[connUserSocketId] = new Peer({
+    initiator: isInitiator,
+    config: configuration,
+    stream: localStream,
+    channelName: messengerChannel,
+  });
 
   peers[connUserSocketId].on("signal", (data) => {
     // webRTC offer, webRTC Answer (SDP informations), ice candidates
@@ -86,7 +112,7 @@ export const prepareNewPeerConnection = (connUserSocketId, isInitiator, stream =
     const messageData = JSON.parse(data);
     appendNewMessage(messageData);
   });
-
+};
 
 export const handleSignalingData = (data) => {
   //add signaling data to peer connection
@@ -140,53 +166,44 @@ const showLocalVideoPreview = (stream) => {
 };
 
 const addStream = (stream, connUserSocketId) => {
-  // Check if the current user is the room host
-  const currentUserIsHost = store.getState().isRoomHost;
+  //display incoming stream
+  const videosContainer = document.getElementById("videos_portal");
+  const videoContainer = document.createElement("div");
+  videoContainer.id = connUserSocketId;
 
-  // If the current user is the host, only add the host's stream
-  if (currentUserIsHost && connUserSocketId === store.getState().socketId) {
+  videoContainer.classList.add("video_track_container");
+  const videoElement = document.createElement("video");
+  videoElement.autoplay = true;
+  videoElement.srcObject = stream;
+  videoElement.id = `${connUserSocketId}-video`;
 
-    // display incoming stream
-    const videosContainer = document.getElementById("videos_portal");
-    const videoContainer = document.createElement("div");
-    videoContainer.id = connUserSocketId;
+  videoElement.onloadedmetadata = () => {
+    videoElement.play();
+  };
 
-    videoContainer.classList.add("video_track_container");
-    const videoElement = document.createElement("video");
-    videoElement.autoplay = true;
-    videoElement.srcObject = stream;
-    videoElement.id = `${connUserSocketId}-video`;
-
-    videoElement.onloadedmetadata = () => {
-      videoElement.play();
-    };
-
-    videoElement.addEventListener("click", () => {
-      if (videoElement.classList.contains("full_screen")) {
-        videoElement.classList.remove("full_screen");
-      } else {
-        videoElement.classList.add("full_screen");
-      }
-    });
-
-    videoContainer.appendChild(videoElement);
-
-    // check if other user connected only with audio
-    const participants = store.getState().participants;
-
-    const participant = participants.find((p) => p.socketId === connUserSocketId);
-    console.log(participant);
-    if (participant?.onlyAudio) {
-      videoContainer.appendChild(getAudioOnlyLabel(participant.identity));
+  videoElement.addEventListener("click", () => {
+    if (videoElement.classList.contains("full_screen")) {
+      videoElement.classList.remove("full_screen");
     } else {
-      videoContainer.style.position = "static";
+      videoElement.classList.add("full_screen");
     }
+  });
 
-    videosContainer.appendChild(videoContainer);
+  videoContainer.appendChild(videoElement);
+
+  // check if other user connected only with audio
+  const participants = store.getState().participants;
+
+  const participant = participants.find((p) => p.socketId === connUserSocketId);
+  console.log(participant);
+  if (participant?.onlyAudio) {
+    videoContainer.appendChild(getAudioOnlyLabel(participant.identity));
+  } else {
+    videoContainer.style.position = "static";
   }
+
+  videosContainer.appendChild(videoContainer);
 };
-
-
 
 const getAudioOnlyLabel = (identity = "") => {
   const labelContainer = document.createElement("div");
