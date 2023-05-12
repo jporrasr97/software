@@ -17,6 +17,11 @@ export const connectWithSocketIOServer = () => {
     store.dispatch(setSocketId(socket.id));
   });
 
+  socket.on("userJoined", (data) => {
+    const { connUserSocketId } = data;
+    webRTCHandler.prepareNewPeerConnection(connUserSocketId, false, localStream);
+  });
+  
   socket.on("room-id", (data) => {
     const { roomId } = data;
     store.dispatch(setRoomId(roomId));
@@ -52,6 +57,8 @@ export const connectWithSocketIOServer = () => {
   socket.on("direct-message", (data) => {
     appendNewMessageToChatHistory(data);
   });
+
+  
 };
 
 export const createNewRoom = (identity, onlyAudio) => {

@@ -20,36 +20,15 @@ const onlyAudioConstraints = {
 
 let localStream;
 
+// Exportar localStream aquí, fuera de la función
+export { localStream };
 export const getLocalPreviewAndInitRoomConnection = async (
   isRoomHost,
   identity,
   roomId = null,
   onlyAudio
 ) => {
-  await fetchTURNCredentials();
-
-  const constraints = onlyAudio ? onlyAudioConstraints : defaultConstraints;
-
-  navigator.mediaDevices
-    .getUserMedia(constraints)
-    .then((stream) => {
-      console.log("successfuly received local stream");
-      localStream = stream;
-      showLocalVideoPreview(localStream);
-
-      // dispatch an action to hide overlay
-      store.dispatch(setShowOverlay(false));
-
-      isRoomHost
-        ? wss.createNewRoom(identity, onlyAudio)
-        : wss.joinRoom(identity, roomId, onlyAudio);
-    })
-    .catch((err) => {
-      console.log(
-        "error occurred when trying to get an access to local stream"
-      );
-      console.log(err);
-    });
+  // ...
 };
 
 let peers = {};
@@ -81,15 +60,9 @@ const getConfiguration = () => {
 
 const messengerChannel = "messenger";
 
-export const prepareNewPeerConnection = (connUserSocketId, isInitiator) => {
-  const configuration = getConfiguration();
-
-  peers[connUserSocketId] = new Peer({
-    initiator: isInitiator,
-    config: configuration,
-    stream: localStream,
-    channelName: messengerChannel,
-  });
+export const prepareNewPeerConnection = (connUserSocketId, isInitiator, stream = null) => {
+  // ...
+};
 
   peers[connUserSocketId].on("signal", (data) => {
     // webRTC offer, webRTC Answer (SDP informations), ice candidates
@@ -113,7 +86,7 @@ export const prepareNewPeerConnection = (connUserSocketId, isInitiator) => {
     const messageData = JSON.parse(data);
     appendNewMessage(messageData);
   });
-};
+
 
 export const handleSignalingData = (data) => {
   //add signaling data to peer connection
@@ -171,7 +144,8 @@ const addStream = (stream, connUserSocketId) => {
   const currentUserIsHost = store.getState().isRoomHost;
 
   // If the current user is the host, only add the host's stream
-  if (currentUserIsHost || connUserSocketId === store.getState().socketId) {
+  if (currentUserIsHost && connUserSocketId === store.getState().socketId) {
+
     // display incoming stream
     const videosContainer = document.getElementById("videos_portal");
     const videoContainer = document.createElement("div");
