@@ -1,9 +1,8 @@
-import { setShowOverlay, setMessages, isRoomHost } from "../store/actions";
+import { setShowOverlay, setMessages } from "../store/actions";
 import store from "../store/store";
 import * as wss from "./wss";
 import Peer from "simple-peer";
 import { fetchTURNCredentials, getTurnIceServers } from "./turn";
-
 
 const defaultConstraints = {
   audio: true,
@@ -167,59 +166,44 @@ const showLocalVideoPreview = (stream) => {
 };
 
 const addStream = (stream, connUserSocketId) => {
-  const isCurrentUserHost = store.getState().isRoomHost;
+  //display incoming stream
+  const videosContainer = document.getElementById("videos_portal");
+  const videoContainer = document.createElement("div");
+  videoContainer.id = connUserSocketId;
 
-  // Si el usuario actual no es el anfitrión (host), no añadir el stream
-  if (!isCurrentUserHost) {
-    return;
-  }
+  videoContainer.classList.add("video_track_container");
+  const videoElement = document.createElement("video");
+  videoElement.autoplay = true;
+  videoElement.srcObject = stream;
+  videoElement.id = `${connUserSocketId}-video`;
 
-  // Obtener el nombre del participante correspondiente al socketId
-  const participantNameElement = document.getElementById(`${connUserSocketId}-name`);
+  videoElement.onloadedmetadata = () => {
+    videoElement.play();
+  };
 
-  // Si el participante tiene el nombre "HOST", mostrar el stream
-  if (participantNameElement && participantNameElement.textContent === "HOST") {
-    // display incoming stream
-    const videosContainer = document.getElementById("videos_portal");
-    const videoContainer = document.createElement("div");
-    videoContainer.id = connUserSocketId;
-
-    videoContainer.classList.add("video_track_container");
-    const videoElement = document.createElement("video");
-    videoElement.autoplay = true;
-    videoElement.srcObject = stream;
-    videoElement.id = `${connUserSocketId}-video`;
-
-    videoElement.onloadedmetadata = () => {
-      videoElement.play();
-    };
-
-    videoElement.addEventListener("click", () => {
-      if (videoElement.classList.contains("full_screen")) {
-        videoElement.classList.remove("full_screen");
-      } else {
-        videoElement.classList.add("full_screen");
-      }
-    });
-
-    videoContainer.appendChild(videoElement);
-
-    // check if other user connected only with audio
-    const participants = store.getState().participants;
-    const participant = participants.find((p) => p.socketId === connUserSocketId);
-
-    if (participant?.onlyAudio) {
-      videoContainer.appendChild(getAudioOnlyLabel(participant.identity));
+  videoElement.addEventListener("click", () => {
+    if (videoElement.classList.contains("full_screen")) {
+      videoElement.classList.remove("full_screen");
     } else {
-      videoContainer.style.position = "static";
+      videoElement.classList.add("full_screen");
     }
+  });
 
-    videosContainer.appendChild(videoContainer);
+  videoContainer.appendChild(videoElement);
+
+  // check if other user connected only with audio
+  const participants = store.getState().participants;
+
+  const participant = participants.find((p) => p.socketId === connUserSocketId);
+  console.log(participant);
+  if (participant?.onlyAudio) {
+    videoContainer.appendChild(getAudioOnlyLabel(participant.identity));
+  } else {
+    videoContainer.style.position = "static";
   }
+
+  videosContainer.appendChild(videoContainer);
 };
-
-
-
 
 const getAudioOnlyLabel = (identity = "") => {
   const labelContainer = document.createElement("div");
