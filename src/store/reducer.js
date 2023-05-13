@@ -1,5 +1,18 @@
 import Actions from "./actions";
-
+import {
+  SET_ROOM_ID,
+  SET_IDENTITY,
+  ADD_VIDEO_STREAM,
+  SET_IS_ROOM_HOST,
+  SET_CONNECT_ONLY_WITH_AUDIO,
+  SET_SHOW_OVERLAY,
+  SET_PARTICIPANTS,
+  SET_MESSAGES,
+  SET_ACTIVE_CONVERSATION,
+  SET_DIRECT_CHAT_HISTORY,
+  SET_SOCKET_ID,
+  // ... other actions
+} from "./actions";
 const initState = {
   identity: "",
   isRoomHost: false,
@@ -10,8 +23,10 @@ const initState = {
   messages: [],
   activeConversation: null,
   directChatHistory: [],
-  socketId: null
+  socketId: null,
+  videoStreams: [], // Add videoStreams to the initial state
 };
+
 
 const reducer = (state = initState, action) => {
   switch (action.type) {
@@ -65,9 +80,15 @@ const reducer = (state = initState, action) => {
         ...state,
         socketId: action.socketId
       }
-    default:
-      return state;
-  }
-};
+      case ADD_VIDEO_STREAM:
+        return {
+          ...state,
+          videoStreams: [...state.videoStreams, action.payload],
+        };
+      default:
+        return state;
+    }
+  };
+
 
 export default reducer;

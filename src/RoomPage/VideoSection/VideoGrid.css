@@ -1,0 +1,134 @@
+/* VideoGrid.css */
+.videos_portal {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.video_track_container {
+  position: relative;
+  margin: 10px;
+  border: 1px solid #ccc;
+}
+video {
+  width: 100%;
+  height: auto;
+  cursor: pointer;
+}
+.full_screen {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.label_only_audio_container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.label_only_audio_text {
+  color: #fff;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* roompage.css styles */
+
+.room_container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+}
+
+/* Additional styles from roompage.css omitted for brevity */
+
+.participants {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.participant {
+  flex-grow: 1;
+}
+
+video {
+  width: 100%;
+  height: auto;
+  cursor: pointer;
+}
+
+.screen_share_track {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  top: 0;
+  left: 0;
+}
+
+.room {
+  width: 100%;
+  height: 100%;
+}
+
+video {
+  width: 98%;
+  height: 98%;
+}
+
+.room_label {
+  position: absolute;
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  z-index: 4;
+}
+
+.room_label_paragraph {
+  font-size: 17px;
+  color: white;
+  margin-top: 0;
+  padding: 18px 38px;
+  background: #808080;
+  border-radius: 0px 0px 15px 15px;
+}
+
+/* New container for video, banner, and buttons */
+.video_banner_buttons_container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.banner_container {
+  margin: 10px;
+}
+
+
+.banner_image {
+  width: 100%;
+  max-height: 100px;
+  object-fit: contain;
+}
+
+
+.videos_portal {
+  max-height: calc(100% - 50px); /* Ajusta el valor 50px según la altura del video_bottoms_container */
+  overflow-y: auto;
+}

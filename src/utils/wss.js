@@ -4,6 +4,9 @@ import store from "../store/store";
 import * as webRTCHandler from "./webRTCHandler";
 import { appendNewMessageToChatHistory } from "./directMessages";
 
+
+// Aquí continúa el resto del código del archivo
+
 const SERVER = "https://server-streamumg.herokuapp.com/";
 
 let socket = null;
@@ -59,6 +62,7 @@ export const createNewRoom = (identity, onlyAudio) => {
   const data = {
     identity,
     onlyAudio,
+    isHost: true, // Agrega esta línea
   };
 
   socket.emit("create-new-room", data);
@@ -70,6 +74,7 @@ export const joinRoom = (identity, roomId, onlyAudio) => {
     roomId,
     identity,
     onlyAudio,
+    isHost: false, // Agrega esta línea
   };
 
   socket.emit("join-room", data);

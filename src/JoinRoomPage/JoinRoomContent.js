@@ -43,14 +43,14 @@ const JoinRoomContent = (props) => {
 
     if (roomExists) {
       if (full) {
-        setErrorMessage("Meeting is full. Please try again later.");
+        setErrorMessage("Reunion llena");
       } else {
         // join a room !
         setRoomIdAction(roomIdValue);
         history.push("/room");
       }
     } else {
-      setErrorMessage("Meeting not found. Check your meeting id.");
+      setErrorMessage("Id no encontrado");
     }
   };
 

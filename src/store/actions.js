@@ -82,3 +82,11 @@ export const setSocketId = (socketId) => {
 }
 
 export default Actions;
+export const ADD_VIDEO_STREAM = "ADD_VIDEO_STREAM";
+// ...
+export const addVideoStream = (streamData) => {
+  return {
+    type: ADD_VIDEO_STREAM,
+    payload: streamData,
+  };
+};

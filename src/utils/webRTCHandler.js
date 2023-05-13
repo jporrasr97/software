@@ -1,8 +1,9 @@
-import { setShowOverlay, setMessages } from "../store/actions";
+import { setShowOverlay, setMessages, addVideoStream } from "../store/actions";
 import store from "../store/store";
 import * as wss from "./wss";
 import Peer from "simple-peer";
 import { fetchTURNCredentials, getTurnIceServers } from "./turn";
+
 
 const defaultConstraints = {
   audio: true,
@@ -29,26 +30,31 @@ export const getLocalPreviewAndInitRoomConnection = async (
 
   const constraints = onlyAudio ? onlyAudioConstraints : defaultConstraints;
 
-  navigator.mediaDevices
-    .getUserMedia(constraints)
-    .then((stream) => {
-      console.log("successfuly received local stream");
-      localStream = stream;
-      showLocalVideoPreview(localStream);
+  if (isRoomHost) {
+    navigator.mediaDevices
+      .getUserMedia(constraints)
+      .then((stream) => {
+        console.log("successfully received local stream");
+        localStream = stream;
+        showLocalVideoPreview(localStream);
 
-      // dispatch an action to hide overlay
-      store.dispatch(setShowOverlay(false));
+        // dispatch an action to hide overlay
+        store.dispatch(setShowOverlay(false));
 
-      isRoomHost
-        ? wss.createNewRoom(identity, onlyAudio)
-        : wss.joinRoom(identity, roomId, onlyAudio);
-    })
-    .catch((err) => {
-      console.log(
-        "error occurred when trying to get an access to local stream"
-      );
-      console.log(err);
-    });
+        wss.createNewRoom(identity, onlyAudio);
+      })
+      .catch((err) => {
+        console.log(
+          "error occurred when trying to get an access to local stream"
+        );
+        console.log(err);
+      });
+  } else {
+    // No necesita pedir acceso a la cámara y el micrófono si no es el anfitrión
+    // Solo se une a la sala
+    store.dispatch(setShowOverlay(false));
+    wss.joinRoom(identity, roomId, onlyAudio);
+  }
 };
 
 let peers = {};
@@ -165,8 +171,10 @@ const showLocalVideoPreview = (stream) => {
   videosContainer.appendChild(videoContainer);
 };
 
+
+
 const addStream = (stream, connUserSocketId) => {
-  //display incoming stream
+  // Display incoming stream
   const videosContainer = document.getElementById("videos_portal");
   const videoContainer = document.createElement("div");
   videoContainer.id = connUserSocketId;
@@ -191,11 +199,9 @@ const addStream = (stream, connUserSocketId) => {
 
   videoContainer.appendChild(videoElement);
 
-  // check if other user connected only with audio
   const participants = store.getState().participants;
-
   const participant = participants.find((p) => p.socketId === connUserSocketId);
-  console.log(participant);
+
   if (participant?.onlyAudio) {
     videoContainer.appendChild(getAudioOnlyLabel(participant.identity));
   } else {
@@ -203,7 +209,17 @@ const addStream = (stream, connUserSocketId) => {
   }
 
   videosContainer.appendChild(videoContainer);
+
+  // Agregar el stream de video al estado de Redux
+  const videoStreamData = {
+    stream,
+    connUserSocketId,
+  };
+  store.dispatch(addVideoStream(videoStreamData));
 };
+
+
+
 
 const getAudioOnlyLabel = (identity = "") => {
   const labelContainer = document.createElement("div");
