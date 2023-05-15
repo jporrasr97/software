@@ -1,12 +1,14 @@
-import React from "react";
-import VideoButtons from "./VideoButtons";
-import VideoGrid from "./VideoGrid";
+import React from 'react';
+import VideoButtons from './VideoButtons';
+import VideoGrid from './VideoGrid';
 
-const VideoSection = () => {
+const VideoSection = (props) => {
+  const { isRoomHost } = props;
+
   return (
     <div className="video_section_container">
       <VideoGrid />
-      <VideoButtons />
+      <VideoButtons isRoomHost={isRoomHost} />
     </div>
   );
 };

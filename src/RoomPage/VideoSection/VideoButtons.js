@@ -6,7 +6,11 @@ import SwitchToScreenSharingButton from "./SwitchToScreenSharingButton";
 import { connect } from "react-redux";
 
 const VideoButtons = (props) => {
-  const { connectOnlyWithAudio } = props;
+  const { connectOnlyWithAudio, isRoomHost } = props;
+
+  if (!isRoomHost) {
+    return null;
+  }
 
   return (
     <div className="video_buttons_container">

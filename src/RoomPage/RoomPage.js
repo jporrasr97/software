@@ -33,7 +33,7 @@ const RoomPage = ({
   return (
     <div className="room_container">
       <ParticipantsSection />
-      <VideoSection />
+      <VideoSection isRoomHost={isRoomHost} />
       <ChatSection />
       <RoomLabel roomId={roomId} />
       {showOverlay && <Overlay />}
