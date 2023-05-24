@@ -1,16 +1,15 @@
 import React from "react";
 import { connect } from "react-redux";
 import "./VideoGrid.css";
-import banner from "../../resources/images/banner.png";
 
-const VideoGrid = ({ videoStreams }) => {
+const VideoGrid = ({ videoStreams, currentBanner }) => {
   return (
     <div id="videos_portal" className="videos_portal">
       {videoStreams.map((streamData, index) => {
         const { stream, socketId, onlyAudio, identity } = streamData;
 
         return (
-          socketId && ( // Agrega esta línea para verificar si socketId está definido
+          socketId && (
             <div key={socketId} className="video_track_container">
               <video
                 id={`${socketId}-video`}
@@ -25,13 +24,13 @@ const VideoGrid = ({ videoStreams }) => {
                   <p className="label_only_audio_text">{`Only audio ${identity}`}</p>
                 </div>
               )}
-              {index === 0 && (
+              {currentBanner && (
                 <div className="banner_container">
-                  <img src={banner} alt="Banner" className="banner_image" />
+                  <img src={currentBanner} alt="Banner" className="banner_image" />
                 </div>
               )}
             </div>
-          ) // Cierra la expresión condicional aquí
+          )
         );
       })}
     </div>
@@ -41,7 +40,9 @@ const VideoGrid = ({ videoStreams }) => {
 const mapStateToProps = (state) => {
   return {
     videoStreams: state.videoStreams,
+    currentBanner: state.currentBanner, // Conecta currentBanner al estado global
   };
 };
+
 
 export default connect(mapStateToProps)(VideoGrid);
